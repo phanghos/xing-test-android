@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
 import com.jakewharton.rxbinding2.support.v7.widget.RxRecyclerView
+import com.jakewharton.rxbinding2.view.RxView
 import com.taitascioredev.android.xingtest.R
 import com.taitascioredev.android.xingtest.data.entity.RepositoryEntity
 import com.taitascioredev.android.xingtest.navigateToUrl
@@ -56,6 +57,8 @@ class MainActivity : AppCompatActivity(), HasActivityInjector {
     }
 
     private fun bindUiEvents() {
+        RxView.clicks(btn_retry).subscribe { viewModel.getXingRepos(true) }
+
         RxRecyclerView.scrollEvents(list)
                 .filter {
                     val layoutManager = list.layoutManager as LinearLayoutManager
@@ -76,7 +79,7 @@ class MainActivity : AppCompatActivity(), HasActivityInjector {
 
         state?.let {
             when {
-                state.loading && !isListUpdating -> renderLoading()
+                state.loading -> renderLoading()
                 state.repos != null -> renderRepos(state.repos)
                 state.error != null -> renderError(state.error)
             }
@@ -85,11 +88,15 @@ class MainActivity : AppCompatActivity(), HasActivityInjector {
 
     private fun renderLoading() {
         progress_wheel.visibility = View.VISIBLE
+        list.visibility = View.GONE
+        btn_retry.visibility = View.GONE
     }
 
     private fun renderRepos(repos: List<RepositoryEntity>) {
         list.visibility = View.VISIBLE
         progress_wheel.visibility = View.GONE
+        btn_retry.visibility = View.GONE
+
         if (adapter == null) {
             adapter = RepositoryAdapter(repos)
             list.adapter = adapter
@@ -100,7 +107,9 @@ class MainActivity : AppCompatActivity(), HasActivityInjector {
     }
 
     private fun renderError(error: Throwable) {
-
+        btn_retry.visibility = View.VISIBLE
+        progress_wheel.visibility = View.GONE
+        list.visibility = View.GONE
     }
 
     private fun showDialog(repo: RepositoryEntity) {
