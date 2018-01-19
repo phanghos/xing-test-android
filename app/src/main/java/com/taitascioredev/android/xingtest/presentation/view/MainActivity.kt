@@ -16,7 +16,6 @@ import com.taitascioredev.android.xingtest.presentation.adapter.RepositoryAdapte
 import com.taitascioredev.android.xingtest.presentation.model.RepositoryListViewState
 import com.taitascioredev.android.xingtest.presentation.viewmodel.RepositoryListViewModel
 import com.taitascioredev.android.xingtest.presentation.viewmodel.RepositoryListViewModelFactory
-import com.taitascioredev.android.xingtest.snackbar
 import dagger.android.AndroidInjection
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
@@ -47,10 +46,6 @@ class MainActivity : AppCompatActivity(), HasActivityInjector {
         ViewModelProviders.of(this, factory).get(RepositoryListViewModel::class.java)
     }
 
-    private val scrollAccumulator = BiFunction<Int, Int, Int> { lastPos, curPos ->
-        if (curPos > lastPos) 1 else 0
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -61,18 +56,17 @@ class MainActivity : AppCompatActivity(), HasActivityInjector {
     }
 
     private fun bindUiEvents() {
-        RxRecyclerView.scrollStateChanges(list)
-                .map { (list.layoutManager as LinearLayoutManager).findLastVisibleItemPosition() }
-                .filter { it >= adapter?.itemCount!! - UPDATE_OFFSET && !isListUpdating }
-                .distinctUntilChanged()
-                //.scan(0, scrollAccumulator)
-                //.filter { it == 1 }
-                .doOnNext {
-                    //isListUpdating = true
-                    //snackbar(container, "Loading... Please wait")
+        RxRecyclerView.scrollEvents(list)
+                .filter {
+                    val layoutManager = list.layoutManager as LinearLayoutManager
+                    val visibleItemCount = layoutManager.childCount
+                    val totalItemCount = layoutManager.itemCount
+                    val pastVisibleItems = layoutManager.findFirstVisibleItemPosition()
+
+                    visibleItemCount + pastVisibleItems + UPDATE_OFFSET >= totalItemCount && !isListUpdating
                 }
-                .subscribe()
-                //.subscribe { viewModel.getXingRepos(true) }
+                .doOnNext { isListUpdating = true }
+                .subscribe { viewModel.getXingRepos(true) }
     }
 
     private fun render(state: RepositoryListViewState?) {
@@ -82,7 +76,7 @@ class MainActivity : AppCompatActivity(), HasActivityInjector {
 
         state?.let {
             when {
-                state.loading -> renderLoading()
+                state.loading && !isListUpdating -> renderLoading()
                 state.repos != null -> renderRepos(state.repos)
                 state.error != null -> renderError(state.error)
             }
