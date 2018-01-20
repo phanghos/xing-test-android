@@ -1,7 +1,7 @@
 package com.taitascioredev.android.xingtest.dagger
 
-import com.taitascioredev.android.xingtest.data.net.GithubService
 import com.taitascioredev.android.xingtest.data.repository.GithubRepository
+import com.taitascioredev.android.xingtest.data.repository.datasource.RepositoryDataStoreFactory
 import com.taitascioredev.android.xingtest.data.repository.impl.GithubRepositoryImpl
 import com.taitascioredev.android.xingtest.domain.usecase.GetXingReposUseCase
 import com.taitascioredev.android.xingtest.domain.usecase.impl.GetXingReposUseCaseImpl
@@ -12,7 +12,7 @@ import dagger.Provides
 /**
  * Created by rrtatasciore on 18/01/18.
  */
-@Module(includes = arrayOf(RepositoryListAbstractModule::class))
+@Module(includes = [RepositoryListAbstractModule::class])
 class RepositoryListModule {
 
     @Provides @ActivityScope
@@ -26,7 +26,7 @@ class RepositoryListModule {
     }
 
     @Provides @ActivityScope
-    fun provideGithubRepositoryImpl(service: GithubService): GithubRepositoryImpl {
-        return GithubRepositoryImpl(service)
+    fun provideGithubRepositoryImpl(factory: RepositoryDataStoreFactory): GithubRepositoryImpl {
+        return GithubRepositoryImpl(factory)
     }
 }
