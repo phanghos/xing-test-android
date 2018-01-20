@@ -33,7 +33,7 @@ class RepositoryAdapter(private var repos: List<RepositoryEntity>) : RecyclerVie
             with (holder) {
                 repoName.text = repo.name
                 repoDescription.text = repo.description
-                repoOwner.text = repo.owner.login
+                repoOwner.text = "by ${repo.owner.login}"
             }
         }
     }
