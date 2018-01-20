@@ -2,6 +2,7 @@ package com.taitascioredev.android.xingtest.dagger
 
 import com.taitascioredev.android.xingtest.data.net.GithubApi
 import com.taitascioredev.android.xingtest.data.net.GithubService
+import com.taitascioredev.android.xingtest.data.net.impl.GithubServiceImpl
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
@@ -14,7 +15,7 @@ import javax.inject.Singleton
 /**
  * Created by rrtatasciore on 18/01/18.
  */
-@Module
+@Module(includes = [NetAbstractModule::class])
 class NetModule {
 
     @Provides @Singleton fun provideOkHttpClient(): OkHttpClient {
@@ -38,7 +39,7 @@ class NetModule {
         return retrofit.create(GithubApi::class.java)
     }
 
-    @Provides @Singleton fun provideGithubService(api: GithubApi): GithubService {
-        return GithubService(api)
+    @Provides @Singleton fun provideGithubService(api: GithubApi): GithubServiceImpl {
+        return GithubServiceImpl(api)
     }
 }
