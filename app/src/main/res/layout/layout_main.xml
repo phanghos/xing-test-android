@@ -33,4 +33,13 @@
         android:text="retry"
         style="?android:attr/borderlessButtonStyle"/>
 
+    <TextView
+        android:id="@+id/tv_msg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:layout_above="@id/btn_retry"
+        android:layout_marginBottom="8dp" />
+
 </RelativeLayout>
