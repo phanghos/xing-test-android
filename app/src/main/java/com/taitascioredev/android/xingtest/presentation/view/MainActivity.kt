@@ -21,7 +21,6 @@ import dagger.android.AndroidInjection
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasActivityInjector
-import io.reactivex.functions.BiFunction
 import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
 
@@ -73,15 +72,15 @@ class MainActivity : AppCompatActivity(), HasActivityInjector {
     }
 
     private fun render(state: RepositoryListViewState?) {
-        if (!state?.loading!!) {
+        if (!state?.loading()!!) {
             isListUpdating = false
         }
 
         state?.let {
             when {
-                state.loading -> renderLoading()
-                state.repos != null -> renderRepos(state.repos)
-                state.error != null -> renderError(state.error)
+                state.loading() -> renderLoading()
+                state.repos() != null -> renderRepos(state.repos()!!)
+                state.error() != null -> renderError(state.error()!!)
             }
         }
     }
