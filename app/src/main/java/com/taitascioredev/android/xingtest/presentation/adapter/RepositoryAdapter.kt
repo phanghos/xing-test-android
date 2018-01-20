@@ -14,7 +14,7 @@ import io.reactivex.subjects.PublishSubject
 /**
  * Created by rrtatasciore on 18/01/18.
  */
-class RepositoryAdapter(private val repos: List<RepositoryEntity>) : RecyclerView.Adapter<RepositoryAdapter.RepositoryViewHolder>() {
+class RepositoryAdapter(private var repos: List<RepositoryEntity>) : RecyclerView.Adapter<RepositoryAdapter.RepositoryViewHolder>() {
 
     private val longClickSubject = PublishSubject.create<RepositoryEntity>()
 
@@ -39,6 +39,8 @@ class RepositoryAdapter(private val repos: List<RepositoryEntity>) : RecyclerVie
     }
 
     fun add(repos: List<RepositoryEntity>) {
+        (this.repos as ArrayList).clear()
+        notifyItemRangeRemoved(0, itemCount)
         ArrayList<RepositoryEntity>(repos).forEach {
             (this.repos as ArrayList).add(it)
             notifyItemInserted(itemCount)
