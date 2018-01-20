@@ -77,7 +77,7 @@ class GithubRepositoryImplTest {
         verify(cloudDataStore).getXingRepos(1)
         resultObservable.test().assertValueCount(2)
         resultObservable.test().assertValueAt(0, RepositoryListViewState.inFlight())
-        resultObservable.test().assertValueAt(1, RepositoryListViewState.success(repos))
+        resultObservable.test().assertValueAt(1, RepositoryListViewState.empty())
         resultObservable.test().assertComplete()
         resultObservable.test().assertNoErrors()
     }
