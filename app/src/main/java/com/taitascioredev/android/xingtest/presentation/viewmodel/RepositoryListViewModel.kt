@@ -41,4 +41,8 @@ class RepositoryListViewModel(private val useCase: GetXingReposUseCase) : ViewMo
     }
 
     fun states(): LiveData<RepositoryListViewState> = stateLiveData //Observable<RepositoryListViewState> = stateSubject
+
+    internal fun setCurrentState(state: RepositoryListViewState) {
+        curState = state
+    }
 }
