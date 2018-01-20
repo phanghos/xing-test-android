@@ -15,12 +15,15 @@ abstract class RepositoryListViewState {
 
     abstract fun error(): Throwable?
 
+    abstract fun empty(): Boolean
+
     companion object {
-        fun create(loading: Boolean, repos: List<RepositoryEntity>?, error: Throwable?): RepositoryListViewState {
-            return AutoValue_RepositoryListViewState(loading, repos, error)
+        fun create(loading: Boolean, repos: List<RepositoryEntity>?, error: Throwable?, empty: Boolean): RepositoryListViewState {
+            return AutoValue_RepositoryListViewState(loading, repos, error, empty)
         }
-        fun success(repos: List<RepositoryEntity>) = create(false, repos, null)
-        fun error(error: Throwable) = create(false, null, error)
-        fun inFlight() = create(true, null, null)
+        fun success(repos: List<RepositoryEntity>) = create(false, repos, null, false)
+        fun error(error: Throwable) = create(false, null, error, false)
+        fun inFlight() = create(true, null, null, false)
+        fun empty() = create(false, null, null, true)
     }
 }
