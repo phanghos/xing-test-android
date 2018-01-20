@@ -13,6 +13,7 @@ def rxAndroidVersion = '2.0.1'
 def rxBindingVersion = '2.0.0'
 def retrofitVersion = '2.3.0'
 def okHttpVersion = '3.9.1'
+def autoValueVersion = '1.5'
 def materialishProgressVersion = '1.7'
 
 // Testing
@@ -50,6 +51,13 @@ dependencies {
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     testImplementation 'junit:junit:4.12'
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
+
+    testCompile("android.arch.core:core-testing:$archComponentsVersion", {
+        exclude group: 'com.android.support', module: 'support-compat'
+        exclude group: 'com.android.support', module: 'support-annotations'
+        exclude group: 'com.android.support', module: 'support-core-utils'
+    })
+
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
 
@@ -89,6 +97,11 @@ dependencies {
 
     //OkHttp
     implementation "com.squareup.okhttp3:logging-interceptor:$okHttpVersion"
+
+    //AutoValue
+    provided "com.google.auto.value:auto-value:$autoValueVersion"
+    annotationProcessor "com.google.auto.value:auto-value:$autoValueVersion"
+    kapt "com.google.auto.value:auto-value:$autoValueVersion"
 
     //Materialish progress
     implementation "com.pnikosis:materialish-progress:$materialishProgressVersion"
