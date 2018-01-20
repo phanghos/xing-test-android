@@ -1,5 +1,8 @@
 package com.taitascioredev.android.xingtest.presentation.adapter
 
+import android.content.Context
+import android.graphics.Color
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -14,7 +17,9 @@ import io.reactivex.subjects.PublishSubject
 /**
  * Created by rrtatasciore on 18/01/18.
  */
-class RepositoryAdapter(private var repos: List<RepositoryEntity>) : RecyclerView.Adapter<RepositoryAdapter.RepositoryViewHolder>() {
+class RepositoryAdapter(
+        private val context: Context,
+        private var repos: List<RepositoryEntity>) : RecyclerView.Adapter<RepositoryAdapter.RepositoryViewHolder>() {
 
     private val longClickSubject = PublishSubject.create<RepositoryEntity>()
 
@@ -35,12 +40,15 @@ class RepositoryAdapter(private var repos: List<RepositoryEntity>) : RecyclerVie
                 repoDescription.text = repo.description
                 repoOwner.text = "by ${repo.owner.login}"
             }
+            if (!repo.fork) {
+                holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.color_fork))
+            } else {
+                holder.itemView.setBackgroundColor(Color.WHITE)
+            }
         }
     }
 
     fun add(repos: List<RepositoryEntity>) {
-        (this.repos as ArrayList).clear()
-        notifyItemRangeRemoved(0, itemCount)
         ArrayList<RepositoryEntity>(repos).forEach {
             (this.repos as ArrayList).add(it)
             notifyItemInserted(itemCount)

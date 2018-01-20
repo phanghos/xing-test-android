@@ -27,7 +27,7 @@ class GithubRepositoryImpl @Inject constructor(private val factory: RepositoryDa
                     }
                     else {
                         curPage++
-                        RepositoryListViewState.success(curList!!)
+                        RepositoryListViewState.success(it)
                     }
                 }
                 .onErrorReturn { RepositoryListViewState.error(it) }
@@ -36,6 +36,7 @@ class GithubRepositoryImpl @Inject constructor(private val factory: RepositoryDa
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
+    // No longer used
     private fun mergeResults(newList: List<RepositoryEntity>) {
         if (curList == null) {
             curList = ArrayList()

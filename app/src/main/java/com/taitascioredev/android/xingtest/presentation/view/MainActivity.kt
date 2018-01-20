@@ -117,10 +117,13 @@ class MainActivity : AppCompatActivity(), HasActivityInjector {
         btn_retry.visibility = View.GONE
         tv_msg.visibility = View.GONE
 
-        adapter = null
-        adapter = RepositoryAdapter(repos)
-        adapter?.getLongClickObservable()?.subscribe { showDialog(it) }
-        list.adapter = adapter
+        if (adapter == null) {
+            adapter = RepositoryAdapter(this, repos)
+            adapter?.getLongClickObservable()?.subscribe { showDialog(it) }
+            list.adapter = adapter
+        } else {
+            adapter?.add(repos)
+        }
     }
 
     private fun renderError(error: Throwable) {

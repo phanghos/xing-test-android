@@ -18,5 +18,6 @@ data class RepositoryEntity(
         val description: String?,
         @TypeConverters(OwnerEntity::class) val owner: OwnerEntity,
         @SerializedName("html_url") val htmlUrl: String,
+        val fork: Boolean,
         val page: Int
 )
