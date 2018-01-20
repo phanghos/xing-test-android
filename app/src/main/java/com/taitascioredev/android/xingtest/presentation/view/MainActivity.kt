@@ -22,6 +22,7 @@ import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasActivityInjector
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.layout_main.*
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), HasActivityInjector {
@@ -49,6 +50,8 @@ class MainActivity : AppCompatActivity(), HasActivityInjector {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        setSupportActionBar(toolbar)
+        list.isNestedScrollingEnabled = true
         AndroidInjection.inject(this)
         viewModel.states().observe(this, Observer { render(it) })
         viewModel.getXingRepos()
@@ -78,7 +81,7 @@ class MainActivity : AppCompatActivity(), HasActivityInjector {
 
         state?.let {
             when {
-                state.loading() -> renderLoading()
+                state.loading() && !isListUpdating -> renderLoading()
                 state.repos() != null -> renderRepos(state.repos()!!)
                 state.error() != null -> renderError(state.error()!!)
             }
@@ -87,7 +90,6 @@ class MainActivity : AppCompatActivity(), HasActivityInjector {
 
     private fun renderLoading() {
         progress_wheel.visibility = View.VISIBLE
-        list.visibility = View.GONE
         btn_retry.visibility = View.GONE
     }
 
