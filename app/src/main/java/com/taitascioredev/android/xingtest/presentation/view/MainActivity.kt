@@ -1,6 +1,7 @@
 package com.taitascioredev.android.xingtest.presentation.view
 
 import android.app.Activity
+import android.app.Dialog
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
@@ -21,21 +22,20 @@ import dagger.android.AndroidInjection
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasActivityInjector
+import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.layout_main.*
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), HasActivityInjector {
 
-    companion object {
-        private val UPDATE_OFFSET = 2
-    }
-
     override fun activityInjector(): AndroidInjector<Activity> {
         return injector
     }
 
     private var isListUpdating = false
+
+    private var finishedLoadingItems = false
 
     @Inject lateinit var factory: RepositoryListViewModelFactory
 
@@ -46,6 +46,10 @@ class MainActivity : AppCompatActivity(), HasActivityInjector {
     private val viewModel: RepositoryListViewModel by lazy {
         ViewModelProviders.of(this, factory).get(RepositoryListViewModel::class.java)
     }
+
+    private val disposables = CompositeDisposable()
+
+    private var dialog: Dialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,20 +62,32 @@ class MainActivity : AppCompatActivity(), HasActivityInjector {
         bindUiEvents()
     }
 
-    private fun bindUiEvents() {
-        RxView.clicks(btn_retry).subscribe { viewModel.getXingRepos(true) }
+    override fun onStop() {
+        super.onStop()
+        dismissDialog()
+    }
 
-        RxRecyclerView.scrollEvents(list)
+    override fun onDestroy() {
+        super.onDestroy()
+        if (!disposables.isDisposed) {
+            disposables.dispose()
+        }
+    }
+
+    private fun bindUiEvents() {
+        disposables.add(RxView.clicks(btn_retry).subscribe { viewModel.getXingRepos(true) })
+
+        disposables.add(RxRecyclerView.scrollEvents(list)
                 .filter {
                     val layoutManager = list.layoutManager as LinearLayoutManager
                     val visibleItemCount = layoutManager.childCount
                     val totalItemCount = layoutManager.itemCount
                     val pastVisibleItems = layoutManager.findFirstVisibleItemPosition()
 
-                    visibleItemCount + pastVisibleItems + UPDATE_OFFSET >= totalItemCount && !isListUpdating
+                    visibleItemCount + pastVisibleItems + 1 >= totalItemCount && !isListUpdating && !finishedLoadingItems
                 }
                 .doOnNext { isListUpdating = true }
-                .subscribe { viewModel.getXingRepos(true) }
+                .subscribe { viewModel.getXingRepos(true) })
     }
 
     private fun render(state: RepositoryListViewState?) {
@@ -84,6 +100,7 @@ class MainActivity : AppCompatActivity(), HasActivityInjector {
                 state.loading() && !isListUpdating -> renderLoading()
                 state.repos() != null -> renderRepos(state.repos()!!)
                 state.error() != null -> renderError(state.error()!!)
+                state.empty() -> finishedLoadingItems = true
             }
         }
     }
@@ -91,32 +108,32 @@ class MainActivity : AppCompatActivity(), HasActivityInjector {
     private fun renderLoading() {
         progress_wheel.visibility = View.VISIBLE
         btn_retry.visibility = View.GONE
+        tv_msg.visibility = View.GONE
     }
 
     private fun renderRepos(repos: List<RepositoryEntity>) {
         list.visibility = View.VISIBLE
         progress_wheel.visibility = View.GONE
         btn_retry.visibility = View.GONE
+        tv_msg.visibility = View.GONE
 
-        if (adapter == null) {
-            adapter = RepositoryAdapter(repos)
-            list.adapter = adapter
-            adapter?.getLongClickObservable()?.subscribe { showDialog(it) }
-        } else {
-            adapter?.add(repos)
-        }
+        adapter = null
+        adapter = RepositoryAdapter(repos)
+        adapter?.getLongClickObservable()?.subscribe { showDialog(it) }
+        list.adapter = adapter
     }
 
     private fun renderError(error: Throwable) {
         btn_retry.visibility = View.VISIBLE
+        tv_msg.visibility = View.VISIBLE
+        tv_msg.text = error.message
         progress_wheel.visibility = View.GONE
         list.visibility = View.GONE
     }
 
     private fun showDialog(repo: RepositoryEntity) {
-        AlertDialog.Builder(this)
-                .setTitle("Confirmation")
-                .setMessage("What page do you want to open?")
+        dialog = AlertDialog.Builder(this)
+                .setTitle("Which page to open?")
                 .setItems(arrayOf("Repo page", "Owner page"), { _, which ->
                     when (which) {
                         0 -> navigateToUrl(repo.htmlUrl)
@@ -124,5 +141,12 @@ class MainActivity : AppCompatActivity(), HasActivityInjector {
                     }
                 })
                 .show()
+    }
+
+    private fun dismissDialog() {
+        if (dialog != null && dialog?.isShowing()!!) {
+            dialog?.dismiss()
+            dialog = null
+        }
     }
 }
