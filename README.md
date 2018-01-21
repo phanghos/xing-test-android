@@ -10,4 +10,4 @@ XING Android technical test
 - Architecture Components (`ViewModel`, `LiveDara`, `Room`)
 - Retrofit2 for consuming the GitHub API
 - OkHttpLoggingInterceptor to log network requests
-- AutoValue to guarantee immutability
+- AutoValue to guarantee immutability and for unit testing as well
