@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity(), HasActivityInjector {
 
     @Inject lateinit var injector: DispatchingAndroidInjector<Activity>
 
-    private var adapter: RepositoryAdapter? = null
+    private var adapter: RepositoryAdapter = RepositoryAdapter(this)
 
     private val viewModel: RepositoryListViewModel by lazy {
         ViewModelProviders.of(this, factory).get(RepositoryListViewModel::class.java)
@@ -56,6 +56,7 @@ class MainActivity : AppCompatActivity(), HasActivityInjector {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
         list.isNestedScrollingEnabled = true
+        list.adapter = adapter
         AndroidInjection.inject(this)
         viewModel.states().observe(this, Observer { render(it) })
         viewModel.getXingRepos()
@@ -117,12 +118,11 @@ class MainActivity : AppCompatActivity(), HasActivityInjector {
         btn_retry.visibility = View.GONE
         tv_msg.visibility = View.GONE
 
-        if (adapter == null) {
-            adapter = RepositoryAdapter(this, repos)
-            adapter?.getLongClickObservable()?.subscribe { showDialog(it) }
-            list.adapter = adapter
+        if (adapter.itemCount == 0) {
+            adapter.add(repos)
+            adapter.getLongClickObservable()?.subscribe { showDialog(it) }
         } else {
-            adapter?.add(repos)
+            adapter.add(repos, true)
         }
     }
 

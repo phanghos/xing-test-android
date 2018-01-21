@@ -17,11 +17,15 @@ import io.reactivex.subjects.PublishSubject
 /**
  * Created by rrtatasciore on 18/01/18.
  */
-class RepositoryAdapter(
-        private val context: Context,
-        private var repos: List<RepositoryEntity>) : RecyclerView.Adapter<RepositoryAdapter.RepositoryViewHolder>() {
+class RepositoryAdapter(private val context: Context) : RecyclerView.Adapter<RepositoryAdapter.RepositoryViewHolder>() {
+
+    private val repos: List<RepositoryEntity>
 
     private val longClickSubject = PublishSubject.create<RepositoryEntity>()
+
+    init {
+        repos = ArrayList()
+    }
 
     override fun getItemCount(): Int {
         return repos.size
@@ -48,11 +52,13 @@ class RepositoryAdapter(
         }
     }
 
-    fun add(repos: List<RepositoryEntity>) {
-        ArrayList<RepositoryEntity>(repos).forEach {
-            (this.repos as ArrayList).add(it)
-            notifyItemInserted(itemCount)
-        }
+    fun add(repos: List<RepositoryEntity>, filter: Boolean = false) {
+        Observable.fromIterable(ArrayList<RepositoryEntity>(repos))
+                .filter { !filter || !this.repos.contains(it) }
+                .subscribe {
+                    (this.repos as ArrayList).add(it)
+                    notifyItemInserted(itemCount)
+                }
     }
 
     fun getLongClickObservable(): Observable<RepositoryEntity> = longClickSubject
