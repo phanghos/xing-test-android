@@ -1,0 +1,7 @@
+I extended a bit over 48 hours because I decided that, since I was good on time, I could implement the caching mechanism in the persisten storage as well :)
+I didn't have enough time unit test everything. I ended up adding the persistent store at a late stage, so the classes inside datasource package have not  been unit tested
+I would have liked to use the MVI design pattern, since I've been playing with it, but I decided not to do it because it was specified that a common design pattern should be used
+With some more time, I would have checked for possible leaks with LeakCanary and other kinds of optimizations i.e. more tests, better UI, a POJO for the model instead of the entity, etc...
+I hope you like the reactive bits
+
+Thank you very much for the opportunity anyway
